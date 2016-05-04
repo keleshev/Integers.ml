@@ -22,3 +22,18 @@ You might be interested in `ocaml-stdint` library, which
 implements same integer types, but using C-bindings instead:
 
 https://github.com/andrenth/ocaml-stdint
+
+Tests
+-----
+
+To run tests you need to install Jane Street Core:
+
+```
+$ opam install core
+```
+
+The following command will run tests:
+
+```
+$ ocamlbuild -use-ocamlfind -tag thread -pkg core -I vendor IntegersTest.byte --
+```
