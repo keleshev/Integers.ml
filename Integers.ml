@@ -1,10 +1,59 @@
-open Core.Std
+module Private = struct
+  let fail format =
+    Printf.ksprintf (fun message () -> failwith message) format
 
-let fail = failwithf
+  module Char = struct
+    let to_int = Char.code
+    let of_int_exn = Char.chr
+    let to_string = String.make 1
+  end
 
-let unwrap value ~or_else = match value with
-  | Some s -> s
-  | None -> or_else ()
+  module Int = struct
+    let (+), (-), (/), ( * ) = (+), (-), (/), ( * )
+    let of_float = int_of_float
+    let to_float = float_of_int
+    let of_string = int_of_string
+    let to_string = string_of_int
+    let bit_and a b = a land b
+
+    let is_even n = n mod 2 = 0
+
+    (* https://en.wikipedia.org/wiki/Exponentiation_by_squaring *)
+    let pow base exponent =
+      if exponent < 0 then invalid_arg "exponent can not be negative" else
+      let rec aux accumulator base = function
+        | 0 -> accumulator
+        | 1 -> base * accumulator
+        | e when is_even e -> aux accumulator (base * base) (e / 2)
+        | e -> aux (base * accumulator) (base * base) ((e - 1) / 2) in
+      aux 1 base exponent
+  end
+
+  module Int64 = struct
+    include Int64
+
+    let (+), (-), (/), ( * ) = add, sub, div, mul
+    let to_int_exn = to_int
+    let to_int = `Use_to_int_exn
+  end
+
+  module String = struct
+    include String
+
+    let to_list string =
+      let rec aux i list =
+        if i = 0 then list else aux (i - 1) (string.[i - 1] :: list) in
+      aux (length string) []
+  end
+
+  let id x = x
+
+  let unwrap value ~or_else = match value with
+    | Some s -> s
+    | None -> or_else ()
+end
+
+open Private
 
 module Spec = struct
   module type Signature = sig
@@ -85,7 +134,7 @@ module Make (Spec: Spec.Signature): Signature = struct
   let of_int n = if n > max_value || n < min_value then None else Some n
   let of_int_exn i = unwrap (of_int i)
     ~or_else:(fail "%s.of_int_exn got int out of range: %i" Spec.type_name i)
-  let to_int = ident
+  let to_int = id
 
   let of_float f = of_int (Int.of_float f)
   let of_float_exn f = unwrap (of_float f)
@@ -115,7 +164,7 @@ module Make (Spec: Spec.Signature): Signature = struct
   let (/!) left right = unwrap (left /? right)
     ~or_else:(fail "%s.(/!) result is out of bounds" Spec.type_name)
 
-  let bit_and = Core.Std.Int.bit_and
+  let bit_and = Int.bit_and
 
   (* exn: 0 and 1 are representable in all int types including u1, except i1 *)
   let zero = of_int_exn 0

@@ -5,10 +5,6 @@ I ripped this implementation out of one of my closed-source
 projects. I'm actively using it, but I don't have time to
 properly maintain it.
 
-This library depends on Jane Street Core, because the project
-that I'm ripping it from is Core-based, but this dependency
-could be easily eliminated, pull-requests are welcome.
-
 If you want to make this into a proper `opam` library, then
 pull-requests are welcome as well.
 
@@ -26,14 +22,8 @@ https://github.com/andrenth/ocaml-stdint
 Tests
 -----
 
-To run tests you need to install Jane Street Core:
-
-```
-$ opam install core
-```
-
 The following command will run tests:
 
 ```
-$ ocamlbuild -use-ocamlfind -tag thread -pkg core -I vendor IntegersTest.byte --
+$ ocamlbuild -I vendor IntegersTest.byte --
 ```

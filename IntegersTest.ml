@@ -101,7 +101,7 @@ module TestInt8 = struct
                    -126, 130;
                    -127, 129;
                    -128, 128] in
-    i8_to_u8 |> Core.Std.List.iter ~f:(fun (left, right) ->
+    i8_to_u8 |> List.iter (fun (left, right) ->
       Int8.Cast.to_uint8 (i8 left) => u8 right)
 
   let () = "Wrapping is undefined for signed integers" >>> fun () ->

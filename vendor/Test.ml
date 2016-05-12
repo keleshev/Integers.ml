@@ -1,5 +1,4 @@
 let (>>) f g x = g (f x)
-module Sexp = Core.Std.Sexp
 module Color = Terminal.Text.Color
 module Template = Terminal.Template
 
@@ -78,15 +77,3 @@ let (=>) left right =
 let test description test =
   prepend global_suite_result TestResult.({description; results=(ref [])});
   try test () with _ -> add_assertion_result AssertionResult.Error
-
-module Assertion = struct
-  let create to_sexp left right =
-    let to_string = to_sexp >> Sexp.to_string_hum in
-    let is_success = Sexp.equal (to_sexp left) (to_sexp right) in
-    add_assertion_result (AssertionResult.of_bool is_success);
-    if not is_success then
-      Template.(print (
-        (text "\n  Expected: ") ^ (green (text (to_string right))) ^
-        (text "\n  Got:      ") ^ (red   (text (to_string left ))) ^ (text "\n")
-      ))
-end
